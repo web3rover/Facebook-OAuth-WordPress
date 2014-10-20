@@ -44,7 +44,6 @@ function facebook_oauth_callback()
         if(isset($_token_and_expire_array["access_token"]))
         {   
             $access_token = $_token_and_expire_array["access_token"];
-            $_SESSION["facebook_access_token"] = $access_token; 
             $user_information = file_get_contents("https://graph.facebook.com/me?access_token=" . $access_token . "&fields=email,name");
         	$user_information_array = json_decode($user_information, true);
 
@@ -54,6 +53,7 @@ function facebook_oauth_callback()
 			{
 				$user_id = username_exists($name);
 				wp_set_auth_cookie($user_id);
+                update_user_meta($user_id, "facebook_access_token", $access_token);
 				header('Location: ' . get_site_url());
 			}
 			else
@@ -62,6 +62,7 @@ function facebook_oauth_callback()
 				wp_create_user($name, generateRandomString(), $email);
 				$user_id = username_exists($name);
 				wp_set_auth_cookie($user_id);
+                update_user_meta($user_id, "facebook_access_token", $access_token);
 				header('Location: ' . get_site_url());
 			}
         }
